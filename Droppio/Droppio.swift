@@ -22,25 +22,25 @@ public class Droppio {
     
     let session = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration())
     
-    public func publish(drop: Drop, completion: (success: Bool, error: NSError) -> Void) {
+    public func publish(drop: Drop, completion: (success: Bool, error: NSError?) -> Void) {
         
         self.makeRequest("POST", path: "/drops", success: { (json) -> Void in
             print(json)
             
             // Unmarshal the response into the correct type
             
-            completion(success: true, error: NSError())
+            completion(success: true, error: nil)
         })
     }
     
-    public func fetchClosest(coordinate: CLLocationCoordinate2D, limit: Int, completion: (success: [Drop], error: NSError) -> Void) {
+    public func fetchClosest(coordinate: CLLocationCoordinate2D, limit: Int, completion: (success: [Drop], error: NSError?) -> Void) {
         
         self.makeRequest("GET", path: "/drops", success: { (json) -> Void in
             print(json)
             
             // Unmarshal the response into the correct type
             
-            completion(success: [], error: NSError())
+            completion(success: [], error: nil)
         })
     }
     
