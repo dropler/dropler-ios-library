@@ -24,7 +24,7 @@ public class Droppio {
     
     public func publish(drop: Drop, completion: (success: Bool, error: NSError) -> Void) {
         
-        self.makeRequest("/drops", success: { (json) -> Void in
+        self.makeRequest("POST", path: "/drops", success: { (json) -> Void in
             print(json)
             
             // Unmarshal the response into the correct type
@@ -35,7 +35,7 @@ public class Droppio {
     
     public func fetchClosest(coordinate: CLLocationCoordinate2D, limit: Int, completion: (success: [Drop], error: NSError) -> Void) {
         
-        self.makeRequest("/drops", success: { (json) -> Void in
+        self.makeRequest("GET", path: "/drops", success: { (json) -> Void in
             print(json)
             
             // Unmarshal the response into the correct type
@@ -50,17 +50,42 @@ public class Droppio {
     //      Private Request Helper Functions      //
     //============================================//
     
-    private func makeRequest(path: String, success: NSDictionary -> ()) {
-        
+    private func buildURLFromPath(path: String) -> NSURL? {
         let c = NSURLComponents()
         c.scheme = DROPSCHEME
         c.host = DROPHOST
         c.path = "\(DROPVERSION)/\(path)"
+        return c.URL
+    }
+    
+    private func makeRequest(method: String, path: String, success: NSDictionary -> ()) {
         
-        let url = c.URL!
-        
-        var request = NSURLRequest(URL: url)
-        
+        if let url = self.buildURLFromPath(path) {
+            var request = NSMutableURLRequest(URL: url)
+            
+            switch method {
+                case "POST":
+                    request.HTTPMethod = "POST"
+                    executeRequestTask(request, success: success)
+                    break
+                case "PUT":
+                    request.HTTPMethod = "PUT"
+                    break
+                case "DELETE":
+                    request.HTTPMethod = "DELETE"
+                    break
+                default:
+                    request.HTTPMethod = "GET"
+                    executeRequestTask(request, success: success)
+                    break
+            }
+        } else {
+            println("Failed to build URL")
+        }
+       
+    }
+    
+    private func executeRequestTask(request: NSMutableURLRequest, success: NSDictionary -> ()) {
         var task = self.session.dataTaskWithRequest(request) { (data, response, error) -> Void in
             self.handleResponse(data, response: response as? NSHTTPURLResponse, error: error, success: success)
         }
